@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { ProductItem } from './components/ProductItem';
+import { CartSidebar } from './components/CartSidebar';
+import { ProductDetail } from './components/ProductDetail';
+import { CartProvider } from './context/CartContext';
 import { shopifyClient } from './lib/shopify';
 
 const MOCK_CATEGORIES = [
@@ -13,27 +16,20 @@ const MOCK_CATEGORIES = [
 const MOCK_TESTIMONIALS = [
   { id: 1, author: 'Carlos Mendoza', text: 'Increíble calidad y envío súper rápido. Quedé asombrado por lo bien que luce el producto en persona, ¡supera las fotos!', rating: 5 },
   { id: 2, author: 'Ana Martínez', text: 'Atención al cliente excepcional. Me ayudaron a elegir mi talla ideal. Sin duda lo recomiendo muchísimo a mis amigos.', rating: 5 },
-  { id: 3, author: 'Sofía Londoño', text: 'Me enamoré de mi nueva mochila. Es elegante, muy resistente y me cabe todo lo necesario para la oficiona. ¡Volveré a comprar!', rating: 5 },
+  { id: 3, author: 'Sofía Londoño', text: 'Me enamoré de mi nueva mochila. Es elegante, muy resistente y me cabe todo lo necesario. ¡Volveré a comprar!', rating: 5 },
 ];
 
-function App() {
+function AppContent() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   useEffect(() => {
-    // Fetch products from Shopify
     shopifyClient.product.fetchAll().then((fetchedProducts) => {
-      // Map Shopify products to our component format
-      const formattedProducts = fetchedProducts.slice(0, 4).map(p => ({
-        id: p.id,
-        title: p.title,
-        price: p.variants[0].price.amount,
-        image: p.images[0]?.src
-      }));
-      setProducts(formattedProducts);
+      setProducts(fetchedProducts);
       setLoading(false);
     }).catch(err => {
-      console.error("Error fetching products from Shopify:", err);
+      console.error("Error fetching products:", err);
       setLoading(false);
     });
   }, []);
@@ -42,16 +38,24 @@ function App() {
     <div className="app">
       <div className="top-banner">🔥 OFERTA RELÁMPAGO: Envío Gratis en pedidos sobre $50 USD 🔥</div>
       <Header />
-      
+      <CartSidebar />
+
+      {selectedProduct && (
+        <ProductDetail
+          product={selectedProduct}
+          onClose={() => setSelectedProduct(null)}
+        />
+      )}
+
       <main>
-        {/* HERO SECTION */}
+        {/* HERO */}
         <section className="hero">
           <h1>Esenciales Modernos Para Tu Día a Día</h1>
           <p>Descubre nuestra cuidada selección de productos diseñados para resistir el tiempo. Mejora tu vida con alta calidad, estética impecable y confort absoluto.</p>
           <a href="#destacado" className="button">Ver Colección Exclusiva</a>
         </section>
 
-        {/* TRUST BADGES / CONFIANZA */}
+        {/* TRUST BADGES */}
         <section className="trust-badges">
           <div className="badge-item">
             <svg className="badge-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
@@ -67,7 +71,7 @@ function App() {
           </div>
         </section>
 
-        {/* AS SEEN ON SECTION */}
+        {/* AS SEEN ON */}
         <section className="as-seen-on">
           <p>MENCIONADOS EN MARCAS LÍDERES</p>
           <div className="logos-grid">
@@ -78,8 +82,8 @@ function App() {
           </div>
         </section>
 
-        {/* CATEGORIES SECTION */}
-        <section className="categories-section">
+        {/* CATEGORIES */}
+        <section id="categorias" className="categories-section">
           <h2>Compra por Categoría</h2>
           <div className="categories-grid">
             {MOCK_CATEGORIES.map(category => (
@@ -92,8 +96,8 @@ function App() {
           </div>
         </section>
 
-        {/* POR QUÉ ELEGIRNOS / FEATURES */}
-        <section className="features-section">
+        {/* FEATURES */}
+        <section id="nosotros" className="features-section">
           <div className="feature">
             <div className="feature-icon">💎</div>
             <h3>Calidad Premium</h3>
@@ -111,38 +115,43 @@ function App() {
           </div>
         </section>
 
-        {/* FEATURED PRODUCTS SECTION */}
+        {/* PRODUCTS */}
         <section id="destacado" className="recommended-products">
           <h2>Tendencias del Momento</h2>
           {loading ? (
-            <p style={{textAlign: 'center'}}>Cargando productos...</p>
+            <div className="loading-spinner">
+              <div className="spinner"></div>
+              <p>Cargando productos...</p>
+            </div>
           ) : (
             <div className="recommended-products-grid">
               {products.map(product => (
-                <ProductItem key={product.id} product={product} />
+                <ProductItem
+                  key={product.id}
+                  product={product}
+                  onSelect={setSelectedProduct}
+                />
               ))}
             </div>
           )}
         </section>
 
-        {/* CUBIERTA VISUAL / BANNER EXTRA */}
+        {/* PROMO BANNER */}
         <section className="promo-banner">
           <div className="promo-content">
             <h2>Lanzamiento Colección de Verano</h2>
             <p>Hasta un 40% de descuento en artículos seleccionados por tiempo limitado. Revitaliza tu armario este verano.</p>
-            <a href="/promociones" className="button">Ver Promociones</a>
+            <a href="#destacado" className="button">Ver Promociones</a>
           </div>
         </section>
 
-        {/* TESTIMONIALS SECTION */}
+        {/* TESTIMONIALS */}
         <section className="testimonials-section">
           <h2>Lo Que Dicen Nuestros Clientes</h2>
           <div className="testimonials-grid">
             {MOCK_TESTIMONIALS.map(testimonial => (
               <div className="testimonial-card" key={testimonial.id}>
-                <div className="stars">
-                  {"★".repeat(testimonial.rating)}
-                </div>
+                <div className="stars">{"★".repeat(testimonial.rating)}</div>
                 <p>"{testimonial.text}"</p>
                 <div className="testimonial-author">- {testimonial.author}</div>
               </div>
@@ -150,9 +159,9 @@ function App() {
           </div>
         </section>
 
-        {/* NEWSLETTER SECTION */}
+        {/* NEWSLETTER */}
         <section className="newsletter-section">
-          <h2>Únete al Club Vip</h2>
+          <h2>Únete al Club VIP</h2>
           <p>Obtén ofertas exclusivas, acceso anticipado a la tienda y <strong>10% de descuento</strong> en tu primer pedido con nosotros.</p>
           <form className="newsletter-form" onSubmit={(e) => e.preventDefault()}>
             <input type="email" placeholder="Escribe tu correo electrónico aquí" required />
@@ -163,6 +172,14 @@ function App() {
 
       <Footer />
     </div>
+  );
+}
+
+function App() {
+  return (
+    <CartProvider>
+      <AppContent />
+    </CartProvider>
   );
 }
 
