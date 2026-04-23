@@ -1,14 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { ProductItem } from './components/ProductItem';
-
-const MOCK_PRODUCTS = [
-  { id: 1, title: 'Camiseta de Algodón Premium', price: '35.00', image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&q=80&w=800' },
-  { id: 2, title: 'Reloj Minimalista Automático', price: '120.00', image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=800' },
-  { id: 3, title: 'Mochila de Cuero Elegante', price: '85.00', image: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&q=80&w=800' },
-  { id: 4, title: 'Gafas de Sol Sostenibles', price: '55.00', image: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?auto=format&fit=crop&q=80&w=800' },
-];
+import { shopifyClient } from './lib/shopify';
 
 const MOCK_CATEGORIES = [
   { id: 1, title: 'Ropa de Hombre', image: 'https://images.unsplash.com/photo-1617137968427-85924c800a22?auto=format&fit=crop&q=80&w=800' },
@@ -23,6 +17,27 @@ const MOCK_TESTIMONIALS = [
 ];
 
 function App() {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Fetch products from Shopify
+    shopifyClient.product.fetchAll().then((fetchedProducts) => {
+      // Map Shopify products to our component format
+      const formattedProducts = fetchedProducts.slice(0, 4).map(p => ({
+        id: p.id,
+        title: p.title,
+        price: p.variants[0].price.amount,
+        image: p.images[0]?.src
+      }));
+      setProducts(formattedProducts);
+      setLoading(false);
+    }).catch(err => {
+      console.error("Error fetching products from Shopify:", err);
+      setLoading(false);
+    });
+  }, []);
+
   return (
     <div className="app">
       <div className="top-banner">🔥 OFERTA RELÁMPAGO: Envío Gratis en pedidos sobre $50 USD 🔥</div>
@@ -99,11 +114,15 @@ function App() {
         {/* FEATURED PRODUCTS SECTION */}
         <section id="destacado" className="recommended-products">
           <h2>Tendencias del Momento</h2>
-          <div className="recommended-products-grid">
-            {MOCK_PRODUCTS.map(product => (
-              <ProductItem key={product.id} product={product} />
-            ))}
-          </div>
+          {loading ? (
+            <p style={{textAlign: 'center'}}>Cargando productos...</p>
+          ) : (
+            <div className="recommended-products-grid">
+              {products.map(product => (
+                <ProductItem key={product.id} product={product} />
+              ))}
+            </div>
+          )}
         </section>
 
         {/* CUBIERTA VISUAL / BANNER EXTRA */}
