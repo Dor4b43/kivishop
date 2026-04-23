@@ -10,13 +10,39 @@ export function Footer({footer: footerPromise, header, publicStoreDomain}) {
       <Await resolve={footerPromise}>
         {(footer) => (
           <footer className="footer">
-            {footer?.menu && header.shop.primaryDomain?.url && (
-              <FooterMenu
-                menu={footer.menu}
-                primaryDomainUrl={header.shop.primaryDomain.url}
-                publicStoreDomain={publicStoreDomain}
-              />
-            )}
+            <div className="footer-content">
+              <div className="footer-section">
+                <h4>About Us</h4>
+                <p style={{color: '#666', fontSize: '0.9375rem', lineHeight: '1.6'}}>
+                  We provide high-quality products for our global customers. 
+                  Focused on design, quality, and fast shipping.
+                </p>
+              </div>
+              
+              <div className="footer-section">
+                <h4>Quick Links</h4>
+                {footer?.menu && header.shop.primaryDomain?.url && (
+                  <FooterMenu
+                    menu={footer.menu}
+                    primaryDomainUrl={header.shop.primaryDomain.url}
+                    publicStoreDomain={publicStoreDomain}
+                  />
+                )}
+              </div>
+
+              <div className="footer-section">
+                <h4>Support</h4>
+                <div className="footer-links">
+                  <NavLink to="/pages/contact">Contact Us</NavLink>
+                  <NavLink to="/pages/faq">FAQ</NavLink>
+                  <NavLink to="/pages/shipping">Tracking</NavLink>
+                </div>
+              </div>
+            </div>
+            
+            <div style={{marginTop: '4rem', paddingTop: '2rem', borderTop: '1px solid #eaeaea', textAlign: 'center', fontSize: '0.8125rem', color: '#999'}}>
+              © {new Date().getFullYear()} {header.shop.name}. All rights reserved.
+            </div>
           </footer>
         )}
       </Await>
@@ -33,7 +59,7 @@ export function Footer({footer: footerPromise, header, publicStoreDomain}) {
  */
 function FooterMenu({menu, primaryDomainUrl, publicStoreDomain}) {
   return (
-    <nav className="footer-menu" role="navigation">
+    <nav className="footer-links" role="navigation">
       {(menu || FALLBACK_FOOTER_MENU).items.map((item) => {
         if (!item.url) return null;
         // if the url is internal, we strip the domain
@@ -53,7 +79,6 @@ function FooterMenu({menu, primaryDomainUrl, publicStoreDomain}) {
             end
             key={item.id}
             prefetch="intent"
-            style={activeLinkStyle}
             to={url}
           >
             {item.title}
@@ -105,19 +130,6 @@ const FALLBACK_FOOTER_MENU = {
     },
   ],
 };
-
-/**
- * @param {{
- *   isActive: boolean;
- *   isPending: boolean;
- * }}
- */
-function activeLinkStyle({isActive, isPending}) {
-  return {
-    fontWeight: isActive ? 'bold' : undefined,
-    color: isPending ? 'grey' : 'white',
-  };
-}
 
 /**
  * @typedef {Object} FooterProps
