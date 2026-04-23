@@ -7,13 +7,13 @@ export function Header() {
         <a href="/"><strong>KIVISHOP</strong></a>
       </div>
       <nav className="header-menu-desktop">
-        <a href="/collections" className="header-menu-item">Collections</a>
-        <a href="/blogs" className="header-menu-item">Blog</a>
-        <a href="/pages/about" className="header-menu-item">About</a>
+        <a href="/colecciones" className="header-menu-item">Colecciones</a>
+        <a href="/blog" className="header-menu-item">Blog</a>
+        <a href="/nosotros" className="header-menu-item">Nosotros</a>
       </nav>
       <div className="header-ctas">
-        <a href="/search">Search</a>
-        <a href="/cart">Cart (0)</a>
+        <a href="/buscar">Buscar</a>
+        <a href="/carrito">Carrito (0)</a>
       </div>
     </header>
   );
